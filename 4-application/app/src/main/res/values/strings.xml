@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">mob-dev-portfolio</string>
+    <string name="search_hint">Search for a parking spot</string>
+
 </resources>
