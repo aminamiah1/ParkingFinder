@@ -9,6 +9,8 @@ import com.example.mob_dev_portfolio.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 1;
+
     private ActivityMainBinding binding;
 
     @Override
