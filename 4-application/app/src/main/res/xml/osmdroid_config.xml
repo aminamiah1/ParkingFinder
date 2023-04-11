@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<org.osmdroid.config.Configuration>
+    <string name="osmdroid.UserAgentValue" value="osmdroid" />
+    <string name="osmdroid.basePath" value="osmdroid" />
+    <string name="osmdroid.tileCache" value="osmdroid/tiles" />
+    <bool name="osmdroid.DebugMapView" value="false" />
+    <bool name="osmdroid.DebugTileProviders" value="false" />
+    <bool name="osmdroid.DebugMapCache" value="false" />
+</org.osmdroid.config.Configuration>

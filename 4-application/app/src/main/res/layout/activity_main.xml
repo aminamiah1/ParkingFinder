@@ -12,34 +12,34 @@
         android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        app:layout_scrollFlags="scroll|enterAlways"
-        app:title="@string/app_name" />
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:title="@string/app_name" />
 
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/search_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:iconifiedByDefault="false"
-        android:queryHint="@string/search"
-        app:defaultQueryHint="@string/search"
-        app:iconifiedByDefault="false"
-        app:layout_scrollFlags="scroll|enterAlways"
-        app:queryBackground="@null"
-        app:queryHint="@string/search"
-        app:searchIcon="@drawable/ic_search" />
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:iconifiedByDefault="false"
+            android:queryHint="@string/search"
+            app:defaultQueryHint="@string/search"
+            app:iconifiedByDefault="false"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:queryBackground="@null"
+            app:queryHint="@string/search"
+            app:searchIcon="@drawable/ic_search" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
     <org.osmdroid.views.MapView
-        android:id="@+id/mapView"
+        android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar"
-        tools:ignore="NotSibling" />
+        android:layout_marginTop="?attr/actionBarSize" />
+
 </RelativeLayout>
 
