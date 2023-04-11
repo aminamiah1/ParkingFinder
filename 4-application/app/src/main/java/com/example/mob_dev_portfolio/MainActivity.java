@@ -3,12 +3,15 @@ package com.example.mob_dev_portfolio;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -21,21 +24,20 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.example.mob_dev_portfolio.databinding.ActivityMainBinding;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.tasks.Tasks;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.RectangularBounds;
-import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.PlacesClient;
 
 import org.json.JSONArray;
@@ -45,10 +47,9 @@ import org.osmdroid.config.Configuration;
 import org.osmdroid.events.MapEventsReceiver;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapController;
 import org.osmdroid.views.MapView;
-import org.osmdroid.views.overlay.MapEventsOverlay;
 import org.osmdroid.views.overlay.Marker;
+import org.osmdroid.views.overlay.MapEventsOverlay;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,37 +58,60 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class MainActivity extends AppCompatActivity {
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.Tasks;
 
+public class MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_LOCATION = 1;
 
     private ActivityMainBinding binding;
     private MapView mapView;
-    private MapController mapController;
+
+    // FusedLocationProviderClient and LocationCallback for location updates
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private LocationCallback locationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Configuration.getInstance().load(getApplicationContext(), PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
-        Configuration.getInstance().setTileFileSystemCacheMaxBytes((long) (100 * 1024 * 1024)); // 100 MB cache size
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        View view = binding.getRoot();
-        setContentView(view);
 
+        // Load the Mapbox configuration
+        Configuration.getInstance().load(getApplicationContext(),
+                PreferenceManager.getDefaultSharedPreferences(getApplicationContext()));
+        Configuration.getInstance().setTileFileSystemCacheMaxBytes((long) (100 * 1024 * 1024)); // 100 MB cache size
+
+        // Inflate the layout and set the content view
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        Button centerButton = findViewById(R.id.center_button);
+        centerButton.setOnClickListener(view -> getLastLocation());
+
+        // Set up the toolbar
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Set up the map view
         mapView = findViewById(R.id.map);
         mapView.setTileSource(TileSourceFactory.MAPNIK);
         mapView.setBuiltInZoomControls(true);
         mapView.setMultiTouchControls(true);
+        mapView.getController().setZoom(15.0);
 
-        mapController = (MapController) mapView.getController();
-        mapController.setZoom(15.0);
-
+        // Set up the location provider client and location callback
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null || locationResult.getLastLocation() == null) {
+                    return;
+                }
+                // Handle location updates here
+            }
+        };
 
+        // Check if we have location permission and request it if necessary
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -97,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
             getLastLocation();
         }
 
+        // Set up the map events overlay
         MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(new MapEventsReceiver() {
             @Override
             public boolean singleTapConfirmedHelper(GeoPoint p) {
@@ -119,36 +144,74 @@ public class MainActivity extends AppCompatActivity {
         mapView.getOverlays().add(mapEventsOverlay);
     }
 
+    // Request location permission
+    private void requestLocationPermission() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                PERMISSION_REQUEST_LOCATION);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_REQUEST_LOCATION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted
+                getLastLocation();
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+                // Disable functionality that requires location permission
+            }
+        }
+    }
+
     private void getLastLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            // Request the missing permissions
+            requestLocationPermission();
             return;
         }
+
+        // Create a blue dot marker for the current location
+        Marker currentLocationMarker = new Marker(mapView);
+        Drawable icon = ContextCompat.getDrawable(this, R.drawable.ic_location);
+        currentLocationMarker.setIcon(icon);
+        currentLocationMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER);
+        currentLocationMarker.setInfoWindow(null);
+        currentLocationMarker.setTitle(null);
+
+        // Get the last known location and update the map
         fusedLocationProviderClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
                     if (location != null) {
                         double lat = location.getLatitude();
                         double lng = location.getLongitude();
                         GeoPoint currentLocation = new GeoPoint(lat, lng);
-                        mapController.setCenter(currentLocation);
+                        mapView.getController().setCenter(currentLocation);
+                        // Set the marker position to the current location
+                        currentLocationMarker.setPosition(currentLocation);
+
+                        // Add the marker to the map overlay and redraw the map
+                        mapView.getOverlays().add(currentLocationMarker);
+                        mapView.invalidate();
+
+                        // Get nearby parking spots
                         getNearbyParkingSpots(currentLocation);
                     }
                 })
                 .addOnFailureListener(this, e -> Log.e("MainActivity", "Error getting location", e));
     }
 
+    // Fetch nearby parking spots
     private void getNearbyParkingSpots(GeoPoint currentLocation) {
         new FetchParkingSpotsAsyncTask().execute(currentLocation);
     }
 
+    // AsyncTask to fetch parking spots from OpenStreetMap and Google Places API
     private class FetchParkingSpotsAsyncTask extends AsyncTask<GeoPoint, Void, List<Marker>> {
 
+        // Perform the fetch operation in the background
         @Override
         protected List<Marker> doInBackground(GeoPoint... geoPoints) {
             GeoPoint currentLocation = geoPoints[0];
@@ -181,8 +244,7 @@ public class MainActivity extends AppCompatActivity {
             Places.initialize(getApplicationContext(), "AIzaSyD_ULCp-e54LRG9DgmABYQ_Owr2XzT3k2Y");
             PlacesClient placesClient = Places.createClient(getApplicationContext());
             LatLngBounds bounds = new LatLngBounds(
-                    new LatLng(currentLocation.getLatitude() - 0.1, currentLocation.getLongitude() - 0.1),
-                    new LatLng(currentLocation.getLatitude() + 0.1, currentLocation.getLongitude() + 0.1));
+                    new LatLng(currentLocation.getLatitude() - 0.1, currentLocation.getLongitude() - 0.1), new LatLng(currentLocation.getLatitude() + 0.1, currentLocation.getLongitude() + 0.1));
             FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
                     .setLocationBias(RectangularBounds.newInstance(bounds))
                     .setTypeFilter(TypeFilter.ESTABLISHMENT)
@@ -211,6 +273,7 @@ public class MainActivity extends AppCompatActivity {
             return markers;
         }
 
+        // Update the map with the fetched parking spots
         @Override
         protected void onPostExecute(List<Marker> markers) {
             for (Marker marker : markers) {
@@ -220,15 +283,31 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Handle activity lifecycle events
     @Override
     public void onResume() {
         super.onResume();
         mapView.onResume();
+        startLocationUpdates();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mapView.onPause();
+        stopLocationUpdates();
+    }
+
+    // Start location updates
+    private void startLocationUpdates() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.requestLocationUpdates(new LocationRequest(), locationCallback, null);
+        }
+    }
+
+    // Stop location updates
+    private void stopLocationUpdates() {
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
 }

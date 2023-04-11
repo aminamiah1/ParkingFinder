@@ -2,5 +2,6 @@
     <string name="app_name">Parking Finder</string>
     <string name="search">Search for a parking spot</string>
     <string name="settings" />
+    <integer name="google_play_services_version">12451000</integer>
 
 </resources>

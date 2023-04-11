@@ -20,18 +20,14 @@
             app:layout_scrollFlags="scroll|enterAlways"
             app:title="@string/app_name" />
 
-        <androidx.appcompat.widget.SearchView
-            android:id="@+id/search_view"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/center_button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:iconifiedByDefault="false"
-            android:queryHint="@string/search"
-            app:defaultQueryHint="@string/search"
-            app:iconifiedByDefault="false"
-            app:layout_scrollFlags="scroll|enterAlways"
-            app:queryBackground="@null"
-            app:queryHint="@string/search"
-            app:searchIcon="@drawable/ic_search" />
+            android:layout_margin="16dp"
+            android:text="Center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
