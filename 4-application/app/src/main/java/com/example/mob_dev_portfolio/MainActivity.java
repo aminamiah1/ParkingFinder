@@ -4,16 +4,18 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -51,6 +53,7 @@ import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.MapEventsOverlay;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -99,6 +102,20 @@ public class MainActivity extends AppCompatActivity {
         mapView.setMultiTouchControls(true);
         mapView.getController().setZoom(15.0);
 
+        SearchView searchView = findViewById(R.id.search_view);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                searchAddress(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
         // Set up the location provider client and location callback
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         locationCallback = new LocationCallback() {
@@ -120,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             getLastLocation();
         }
+
 
         // Set up the map events overlay
         MapEventsOverlay mapEventsOverlay = new MapEventsOverlay(new MapEventsReceiver() {
@@ -309,5 +327,31 @@ public class MainActivity extends AppCompatActivity {
     // Stop location updates
     private void stopLocationUpdates() {
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+    }
+
+    private void searchAddress(String address) {
+        // Convert the address to a GeoPoint
+        Geocoder geocoder = new Geocoder(this);
+        List<Address> addresses;
+        try {
+            addresses = geocoder.getFromLocationName(address, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                Address location = addresses.get(0);
+                GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+
+                // Move the map to the searched address
+                mapView.getController().setCenter(geoPoint);
+                mapView.getController().setZoom(15.0);
+                mapView.invalidate();
+
+                // Fetch parking spots near the searched address
+                getNearbyParkingSpots(geoPoint);
+            } else {
+                Toast.makeText(this, "Address not found", Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error finding address", Toast.LENGTH_SHORT).show();
+        }
     }
 }

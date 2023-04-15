@@ -15,19 +15,26 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="wrap_content"
             android:background="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|enterAlways"
-            app:title="@string/app_name" />
+            app:title="@string/app_name">
 
-        <Button
-            android:id="@+id/center_button"
-            android:layout_width="wrap_content"
+            <Button
+                android:id="@+id/center_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_margin="16dp"
+                android:text="Center" />
+        </androidx.appcompat.widget.Toolbar>
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/search_view"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:text="Center"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            android:layout_margin="8dp"
+            app:queryHint="Search address" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -38,4 +45,3 @@
         android:layout_marginTop="?attr/actionBarSize" />
 
 </RelativeLayout>
-
