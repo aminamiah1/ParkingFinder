@@ -22,7 +22,7 @@ import androidx.core.content.ContextCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.example.mob_dev_portfolio.databinding.ActivityMainBinding;
@@ -237,14 +237,13 @@ public class MainActivity extends AppCompatActivity {
 
             // Fetch parking spots from OpenStreetMap
             String openStreetMapUrl = String.format("https://nominatim.openstreetmap.org/search?q=parking&format=json&lat=%f&lon=%f&zoom=18", currentLocation.getLatitude(), currentLocation.getLongitude());
-            RequestFuture<JSONObject> future = RequestFuture.newFuture();
-            JsonObjectRequest openStreetMapRequest = new JsonObjectRequest(Request.Method.GET, openStreetMapUrl, null, future, future);
+            RequestFuture<JSONArray> future = RequestFuture.newFuture();
+            JsonArrayRequest openStreetMapRequest = new JsonArrayRequest(Request.Method.GET, openStreetMapUrl, null, future, future);
             RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
             requestQueue.add(openStreetMapRequest);
 
             try {
-                JSONObject response = future.get(30, TimeUnit.SECONDS);
-                JSONArray jsonArray = response.getJSONArray("OpenStreetMap");
+                JSONArray jsonArray = future.get(30, TimeUnit.SECONDS);
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject = jsonArray.getJSONObject(i);
                     double lat = jsonObject.getDouble("lat");
