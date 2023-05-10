@@ -18,6 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Mobdevportfolio">
         <activity
+            android:name=".AddFavouriteActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="My App">
@@ -25,7 +28,6 @@
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-
             </intent-filter>
 
             <meta-data

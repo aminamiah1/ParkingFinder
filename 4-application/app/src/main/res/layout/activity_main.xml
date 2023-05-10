@@ -20,13 +20,23 @@
             app:layout_scrollFlags="scroll|enterAlways"
             app:title="@string/app_name">
 
-            <Button
+            <ImageButton
                 android:id="@+id/center_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_margin="16dp"
-                android:text="Center" />
+                android:contentDescription="@string/center_map"
+                android:src="@android:drawable/ic_menu_mylocation" />
+
+            <ImageButton
+                android:id="@+id/add_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:contentDescription="@string/add_favorite_address"
+                android:src="@android:drawable/ic_input_add" />
+
         </androidx.appcompat.widget.Toolbar>
 
         <androidx.appcompat.widget.SearchView
