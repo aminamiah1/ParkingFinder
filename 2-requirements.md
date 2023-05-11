@@ -3,7 +3,7 @@
 
 Student ID: `21063494`
 
-#Functional Requirements:
+# Functional Requirements:
 
 1. Location-based parking spot discovery: The app should be able to identify the user's current location using GPS and show nearby available parking spots.
 
@@ -17,7 +17,7 @@ Student ID: `21063494`
 
 6. Delete favorite addresses: The app should allow users delete their saved favorite addresses.
 
-#Non-Functional Requirements:
+# Non-Functional Requirements:
 
 1. Usability: The app's interface should be user-friendly, allowing users to easily navigate and access its features.
 
